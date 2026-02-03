@@ -1,16 +1,23 @@
 using UnityEngine;
+using Complete.Tank;
 
-namespace Complete
+namespace Complete.Shell
 {
+    /// <summary>
+    /// Handles shell explosion logic, including damage calculation and physics forces.
+    /// </summary>
     public class ShellExplosion : MonoBehaviour
     {
-        public LayerMask m_TankMask;                        // Used to filter what the explosion affects, this should be set to "Players".
-        public ParticleSystem m_ExplosionParticles;         // Reference to the particles that will play on explosion.
-        public AudioSource m_ExplosionAudio;                // Reference to the audio that will play on explosion.
-        public float m_MaxDamage = 100f;                    // The amount of damage done if the explosion is centred on a tank.
-        public float m_ExplosionForce = 1000f;              // The amount of force added to a tank at the centre of the explosion.
-        public float m_MaxLifeTime = 2f;                    // The time in seconds before the shell is removed.
-        public float m_ExplosionRadius = 5f;                // The maximum distance away from the explosion tanks can be and are still affected.
+        [SerializeField] private LayerMask m_TankMask;                        // Used to filter what the explosion affects, this should be set to "Players".
+        [SerializeField] private ParticleSystem m_ExplosionParticles;         // Reference to the particles that will play on explosion.
+        [SerializeField] private AudioSource m_ExplosionAudio;                // Reference to the audio that will play on explosion.
+        [SerializeField] private float m_MaxDamage = 100f;                    // The amount of damage done if the explosion is centred on a tank.
+        [SerializeField] private float m_ExplosionForce = 1000f;              // The amount of force added to a tank at the centre of the explosion.
+        [SerializeField] private float m_MaxLifeTime = 2f;                    // The time in seconds before the shell is removed.
+        [SerializeField] private float m_ExplosionRadius = 5f;                // The maximum distance away from the explosion tanks can be and are still affected.
+
+
+        private const float k_MinDamage = 0f;                                 // The minimum damage that can be dealt.
 
 
         private void Start ()
@@ -20,6 +27,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Triggered when the shell hits something. Handles explosion effects and damage.
+        /// </summary>
         private void OnTriggerEnter (Collider other)
         {
 			// Collect all the colliders in a sphere from the shell's current position to a radius of the explosion radius.
@@ -70,6 +80,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Calculates damage based on the target's distance from the explosion center.
+        /// </summary>
         private float CalculateDamage (Vector3 targetPosition)
         {
             // Create a vector from the shell to the target.
@@ -85,7 +98,7 @@ namespace Complete
             float damage = relativeDistance * m_MaxDamage;
 
             // Make sure that the minimum damage is always 0.
-            damage = Mathf.Max (0f, damage);
+            damage = Mathf.Max (k_MinDamage, damage);
 
             return damage;
         }

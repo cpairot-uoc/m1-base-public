@@ -2,18 +2,25 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Complete.Cameras;
 
-namespace Complete
+namespace Complete.Managers
 {
+    /// <summary>
+    /// Manages the overall game flow, including round transitions, spawning, and scoring.
+    /// </summary>
     public class GameManager : MonoBehaviour
     {
-        public int m_NumRoundsToWin = 5;            // The number of rounds a single player has to win to win the game.
-        public float m_StartDelay = 3f;             // The delay between the start of RoundStarting and RoundPlaying phases.
-        public float m_EndDelay = 3f;               // The delay between the end of RoundPlaying and RoundEnding phases.
-        public CameraControl m_CameraControl;       // Reference to the CameraControl script for control during different phases.
-        public Text m_MessageText;                  // Reference to the overlay Text to display winning text, etc.
-        public GameObject m_TankPrefab;             // Reference to the prefab the players will control.
-        public TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks.
+        public static GameManager instance { get; private set; }
+
+
+        [SerializeField] private int m_NumRoundsToWin = 5;            // The number of rounds a single player has to win to win the game.
+        [SerializeField] private float m_StartDelay = 3f;             // The delay between the start of RoundStarting and RoundPlaying phases.
+        [SerializeField] private float m_EndDelay = 3f;               // The delay between the end of RoundPlaying and RoundEnding phases.
+        [SerializeField] private CameraControl m_CameraControl;       // Reference to the CameraControl script for control during different phases.
+        [SerializeField] private Text m_MessageText;                  // Reference to the overlay Text to display winning text, etc.
+        [SerializeField] private GameObject m_TankPrefab;             // Reference to the prefab the players will control.
+        [SerializeField] private TankManager[] m_Tanks;               // A collection of managers for enabling and disabling different aspects of the tanks.
 
         
         private int m_RoundNumber;                  // Which round the game is currently on.
@@ -21,6 +28,21 @@ namespace Complete
         private WaitForSeconds m_EndWait;           // Used to have a delay whilst the round or game ends.
         private TankManager m_RoundWinner;          // Reference to the winner of the current round.  Used to make an announcement of who won.
         private TankManager m_GameWinner;           // Reference to the winner of the game.  Used to make an announcement of who won.
+
+
+        private void Awake()
+        {
+            // Set the instance to this GameManager.
+            if (instance == null)
+            {
+                instance = this;
+            }
+            else if (instance != this)
+            {
+                // If an instance already exists and it's not this, destroy this.
+                Destroy(gameObject);
+            }
+        }
 
 
         private void Start()
@@ -37,6 +59,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Spawns tanks for all players based on the provided manager settings.
+        /// </summary>
         private void SpawnAllTanks()
         {
             // For all the tanks...
@@ -51,6 +76,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Sets the camera targets to follow all spawned tanks.
+        /// </summary>
         private void SetCameraTargets()
         {
             // Create a collection of transforms the same size as the number of tanks.
@@ -68,7 +96,9 @@ namespace Complete
         }
 
 
-        // This is called from start and will run each phase of the game one after another.
+        /// <summary>
+        /// Main game loop that cycles through starting, playing, and ending phases.
+        /// </summary>
         private IEnumerator GameLoop ()
         {
             // Start off by running the 'RoundStarting' coroutine but don't return until it's finished.
@@ -84,7 +114,7 @@ namespace Complete
             if (m_GameWinner != null)
             {
                 // If there is a game winner, restart the level.
-                SceneManager.LoadScene (0);
+                SceneManager.LoadScene (SceneManager.GetActiveScene().buildIndex);
             }
             else
             {
@@ -95,6 +125,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Preparation phase before a round begins.
+        /// </summary>
         private IEnumerator RoundStarting ()
         {
             // As soon as the round starts reset the tanks and make sure they can't move.
@@ -113,6 +146,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Active gameplay phase where players can control their tanks.
+        /// </summary>
         private IEnumerator RoundPlaying ()
         {
             // As soon as the round begins playing let the players control the tanks.
@@ -130,6 +166,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Final phase after a round concludes, determines winners and updates scores.
+        /// </summary>
         private IEnumerator RoundEnding ()
         {
             // Stop tanks from moving.

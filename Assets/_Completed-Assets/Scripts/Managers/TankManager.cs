@@ -1,16 +1,16 @@
 ﻿using System;
 using UnityEngine;
+using Complete.Tank;
 
-namespace Complete
+namespace Complete.Managers
 {
+    /// <summary>
+    /// Manages the various settings and components of a single tank.
+    /// Controls enabling/disabling of movement and shooting during different game phases.
+    /// </summary>
     [Serializable]
     public class TankManager
     {
-        // This class is to manage various settings on a tank.
-        // It works with the GameManager class to control how the tanks behave
-        // and whether or not players have control of their tank in the 
-        // different phases of the game.
-
         public Color m_PlayerColor;                             // This is the color this tank will be tinted.
         public Transform m_SpawnPoint;                          // The position and direction the tank will have when it spawns.
         [HideInInspector] public int m_PlayerNumber;            // This specifies which player this the manager for.
@@ -24,12 +24,15 @@ namespace Complete
         private GameObject m_CanvasGameObject;                  // Used to disable the world space UI during the Starting and Ending phases of each round.
 
 
+        /// <summary>
+        /// Initializes the tank by getting necessary components and setting up colors and UI.
+        /// </summary>
         public void Setup ()
         {
             // Get references to the components.
             m_Movement = m_Instance.GetComponent<TankMovement> ();
             m_Shooting = m_Instance.GetComponent<TankShooting> ();
-            m_CanvasGameObject = m_Instance.GetComponentInChildren<Canvas> ().gameObject;
+            m_CanvasGameObject = m_Instance.transform.Find("Canvas").gameObject;
 
             // Set the player numbers to be consistent across the scripts.
             m_Movement.m_PlayerNumber = m_PlayerNumber;
@@ -50,7 +53,9 @@ namespace Complete
         }
 
 
-        // Used during the phases of the game where the player shouldn't be able to control their tank.
+        /// <summary>
+        /// Disables control and UI for the tank during non-playing phases.
+        /// </summary>
         public void DisableControl ()
         {
             m_Movement.enabled = false;
@@ -60,7 +65,9 @@ namespace Complete
         }
 
 
-        // Used during the phases of the game where the player should be able to control their tank.
+        /// <summary>
+        /// Enables control and UI for the tank during playing phases.
+        /// </summary>
         public void EnableControl ()
         {
             m_Movement.enabled = true;
@@ -70,7 +77,9 @@ namespace Complete
         }
 
 
-        // Used at the start of each round to put the tank into it's default state.
+        /// <summary>
+        /// Resets the tank to its spawn point and default state.
+        /// </summary>
         public void Reset ()
         {
             m_Instance.transform.position = m_SpawnPoint.position;

@@ -1,16 +1,21 @@
 ﻿using UnityEngine;
 
-namespace Complete
+namespace Complete.Tank
 {
+    /// <summary>
+    /// Controls tank movement and rotation based on player input.
+    /// Manages engine audio and particle systems for movement.
+    /// </summary>
     public class TankMovement : MonoBehaviour
     {
         public int m_PlayerNumber = 1;              // Used to identify which tank belongs to which player.  This is set by this tank's manager.
-        public float m_Speed = 12f;                 // How fast the tank moves forward and back.
-        public float m_TurnSpeed = 180f;            // How fast the tank turns in degrees per second.
-        public AudioSource m_MovementAudio;         // Reference to the audio source used to play engine sounds. NB: different to the shooting audio source.
-        public AudioClip m_EngineIdling;            // Audio to play when the tank isn't moving.
-        public AudioClip m_EngineDriving;           // Audio to play when the tank is moving.
-		public float m_PitchRange = 0.2f;           // The amount by which the pitch of the engine noises can vary.
+        [SerializeField] private float m_Speed = 12f;                 // How fast the tank moves forward and back.
+        [SerializeField] private float m_TurnSpeed = 180f;            // How fast the tank turns in degrees per second.
+        [SerializeField] private AudioSource m_MovementAudio;         // Reference to the audio source used to play engine sounds. NB: different to the shooting audio source.
+        [SerializeField] private AudioClip m_EngineIdling;            // Audio to play when the tank isn't moving.
+        [SerializeField] private AudioClip m_EngineDriving;           // Audio to play when the tank is moving.
+  [SerializeField] private float m_PitchRange = 0.2f;           // The amount by which the pitch of the engine noises can vary.
+  [SerializeField] private float m_InputThreshold = 0.1f;       // The threshold for detecting input for engine audio.
 
         private string m_MovementAxisName;          // The name of the input axis for moving forward and back.
         private string m_TurnAxisName;              // The name of the input axis for turning.
@@ -19,6 +24,7 @@ namespace Complete
         private float m_TurnInputValue;             // The current value of the turn input.
         private float m_OriginalPitch;              // The pitch of the audio source at the start of the scene.
         private ParticleSystem[] m_particleSystems; // References to all the particles systems used by the Tanks
+
 
         private void Awake ()
         {
@@ -80,10 +86,13 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Manages engine sound effects based on whether the tank is moving or idling.
+        /// </summary>
         private void EngineAudio ()
         {
             // If there is no input (the tank is stationary)...
-            if (Mathf.Abs (m_MovementInputValue) < 0.1f && Mathf.Abs (m_TurnInputValue) < 0.1f)
+            if (Mathf.Abs (m_MovementInputValue) < m_InputThreshold && Mathf.Abs (m_TurnInputValue) < m_InputThreshold)
             {
                 // ... and if the audio source is currently playing the driving clip...
                 if (m_MovementAudio.clip == m_EngineDriving)
@@ -116,6 +125,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Moves the tank forward or backward based on player input.
+        /// </summary>
         private void Move ()
         {
             // Create a vector in the direction the tank is facing with a magnitude based on the input, speed and the time between frames.
@@ -126,6 +138,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Rotates the tank left or right based on player input.
+        /// </summary>
         private void Turn ()
         {
             // Determine the number of degrees to be turned based on the input, speed and time between frames.

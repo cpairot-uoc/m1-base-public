@@ -1,22 +1,28 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Complete
+namespace Complete.Tank
 {
+    /// <summary>
+    /// Manages the tank's health, UI feedback (slider/color), and death effects.
+    /// </summary>
     public class TankHealth : MonoBehaviour
     {
-        public float m_StartingHealth = 100f;               // The amount of health each tank starts with.
-        public Slider m_Slider;                             // The slider to represent how much health the tank currently has.
-        public Image m_FillImage;                           // The image component of the slider.
-        public Color m_FullHealthColor = Color.green;       // The color the health bar will be when on full health.
-        public Color m_ZeroHealthColor = Color.red;         // The color the health bar will be when on no health.
-        public GameObject m_ExplosionPrefab;                // A prefab that will be instantiated in Awake, then used whenever the tank dies.
+        [SerializeField] private float m_StartingHealth = 100f;               // The amount of health each tank starts with.
+        [SerializeField] private Slider m_Slider;                             // The slider to represent how much health the tank currently has.
+        [SerializeField] private Image m_FillImage;                           // The image component of the slider.
+        [SerializeField] private Color m_FullHealthColor = Color.green;       // The color the health bar will be when on full health.
+        [SerializeField] private Color m_ZeroHealthColor = Color.red;         // The color the health bar will be when on no health.
+        [SerializeField] private GameObject m_ExplosionPrefab;                // A prefab that will be instantiated in Awake, then used whenever the tank dies.
         
         
         private AudioSource m_ExplosionAudio;               // The audio source to play when the tank explodes.
         private ParticleSystem m_ExplosionParticles;        // The particle system the will play when the tank is destroyed.
         private float m_CurrentHealth;                      // How much health the tank currently has.
         private bool m_Dead;                                // Has the tank been reduced beyond zero health yet?
+
+
+        private const float k_DeadHealthThreshold = 0f;     // The health value at which the tank is considered dead.
 
 
         private void Awake ()
@@ -43,6 +49,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Reduces health by a given amount and checks for death.
+        /// </summary>
         public void TakeDamage (float amount)
         {
             // Reduce current health by the amount of damage done.
@@ -52,13 +61,16 @@ namespace Complete
             SetHealthUI ();
 
             // If the current health is at or below zero and it has not yet been registered, call OnDeath.
-            if (m_CurrentHealth <= 0f && !m_Dead)
+            if (m_CurrentHealth <= k_DeadHealthThreshold && !m_Dead)
             {
                 OnDeath ();
             }
         }
 
 
+        /// <summary>
+        /// Updates the health slider and interpolates its color based on current health.
+        /// </summary>
         private void SetHealthUI ()
         {
             // Set the slider's value appropriately.
@@ -69,6 +81,9 @@ namespace Complete
         }
 
 
+        /// <summary>
+        /// Handles tank destruction: plays effects, sound, and deactivates the tank.
+        /// </summary>
         private void OnDeath ()
         {
             // Set the flag so that this function is only called once.
